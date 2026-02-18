@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Какой ты женский киноархетип?</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #F5F0E8;
+    --ink: #1A1208;
+    --gold: #C8A84B;
+    --rose: #C4544A;
+    --sage: #4A7B6F;
+    --dust: #8B7355;
+    --paper: #EDE8DC;
+    --shadow: rgba(26,18,8,0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse at 20% 20%, rgba(200,168,75,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(196,84,74,0.06) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .film-strip {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 18px;
+    background: var(--ink);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    gap: 6px;
+    overflow: hidden;
+  }
+  .film-strip::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      transparent 14px,
+      rgba(255,255,255,0.12) 14px,
+      rgba(255,255,255,0.12) 20px
+    );
+  }
+  .film-hole {
+    width: 10px; height: 10px;
+    border-radius: 2px;
+    background: var(--cream);
+    opacity: 0.7;
+    flex-shrink: 0;
+    z-index: 1;
+  }
+
+  .film-strip-bottom {
+    top: auto; bottom: 0;
+  }
+
+  .container {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 50px 24px 50px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* INTRO SCREEN */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  .intro-badge {
+    display: inline-block;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1px solid var(--gold);
+    padding: 4px 12px;
+    margin-bottom: 24px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+  }
+
+  h1.title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(36px, 7vw, 62px);
+    font-weight: 900;
+    line-height: 1.05;
+    margin-bottom: 20px;
+    color: var(--ink);
+  }
+
+  h1.title em {
+    font-style: italic;
+    color: var(--rose);
+  }
+
+  .subtitle {
+    font-size: 16px;
+    color: var(--dust);
+    line-height: 1.7;
+    max-width: 520px;
+    margin-bottom: 40px;
+    font-weight: 300;
+  }
+
+  .film-reel {
+    font-size: 72px;
+    margin-bottom: 24px;
+    display: block;
+    animation: spin 8s linear infinite;
+  }
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .btn-start {
+    display: inline-block;
+    background: var(--ink);
+    color: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    padding: 16px 40px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-start::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--rose);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+  }
+  .btn-start:hover::before { transform: scaleX(1); }
+  .btn-start span { position: relative; z-index: 1; }
+
+  .warning-note {
+    margin-top: 20px;
+    font-size: 12px;
+    color: var(--dust);
+    font-style: italic;
+    opacity: 0.7;
+  }
+
+  /* PROGRESS */
+  .progress-bar-wrap {
+    margin-bottom: 40px;
+    position: relative;
+  }
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .progress-label {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--dust);
+    font-weight: 500;
+  }
+  .progress-count {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .progress-track {
+    height: 3px;
+    background: rgba(26,18,8,0.1);
+    position: relative;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--gold);
+    transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  /* QUESTION */
+  .question-number {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 500;
+    margin-bottom: 12px;
+  }
+
+  .question-text {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(20px, 4vw, 28px);
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 36px;
+    color: var(--ink);
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .option {
+    background: white;
+    border: 2px solid transparent;
+    padding: 18px 22px;
+    cursor: pointer;
+    text-align: left;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--ink);
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 2px 8px var(--shadow);
+  }
+  .option::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: var(--gold);
+    transform: scaleY(0);
+    transition: transform 0.2s;
+  }
+  .option:hover {
+    border-color: var(--gold);
+    transform: translateX(4px);
+    box-shadow: 0 4px 16px var(--shadow);
+  }
+  .option:hover::before { transform: scaleY(1); }
+
+  .option.selected {
+    border-color: var(--ink);
+    background: var(--ink);
+    color: var(--cream);
+    transform: translateX(4px);
+  }
+  .option.selected::before {
+    background: var(--gold);
+    transform: scaleY(1);
+  }
+
+  .option-letter {
+    display: inline-block;
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 700;
+    color: var(--gold);
+    margin-right: 10px;
+    font-size: 17px;
+    transition: color 0.2s;
+  }
+  .option.selected .option-letter { color: var(--gold); }
+
+  .btn-next {
+    margin-top: 32px;
+    background: transparent;
+    border: 2px solid var(--ink);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    padding: 13px 32px;
+    cursor: pointer;
+    transition: all 0.2s;
+    opacity: 0;
+    pointer-events: none;
+    text-transform: uppercase;
+  }
+  .btn-next.visible {
+    opacity: 1;
+    pointer-events: all;
+    animation: fadeUp 0.3s ease forwards;
+  }
+  .btn-next:hover {
+    background: var(--ink);
+    color: var(--cream);
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* RESULT */
+  .result-screen {
+    animation: fadeIn 0.6s ease forwards;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .result-icon {
+    font-size: 80px;
+    margin-bottom: 20px;
+    display: block;
+    animation: pop 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards;
+  }
+  @keyframes pop {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .result-label {
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+
+  .result-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(30px, 6vw, 50px);
+    font-weight: 900;
+    line-height: 1.1;
+    margin-bottom: 16px;
+    color: var(--ink);
+  }
+
+  .result-subtitle {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 18px;
+    color: var(--rose);
+    margin-bottom: 28px;
+  }
+
+  .result-divider {
+    width: 60px;
+    height: 2px;
+    background: var(--gold);
+    margin: 0 0 28px 0;
+  }
+
+  .result-description {
+    font-size: 16px;
+    line-height: 1.8;
+    color: var(--ink);
+    margin-bottom: 24px;
+    font-weight: 300;
+  }
+
+  .result-films {
+    background: var(--paper);
+    padding: 20px 24px;
+    margin-bottom: 28px;
+    border-left: 3px solid var(--gold);
+  }
+  .result-films-label {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--dust);
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+  .result-films p {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--ink);
+    font-style: italic;
+  }
+
+  .result-feminist {
+    background: var(--ink);
+    color: var(--cream);
+    padding: 20px 24px;
+    margin-bottom: 36px;
+  }
+  .result-feminist-label {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+  .result-feminist p {
+    font-size: 14px;
+    line-height: 1.7;
+    opacity: 0.85;
+  }
+
+  .btn-restart {
+    background: transparent;
+    border: 2px solid var(--ink);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    padding: 12px 28px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+  .btn-restart:hover {
+    background: var(--ink);
+    color: var(--cream);
+  }
+
+  /* QUESTION TRANSITION */
+  .quiz-screen {
+    animation: slideIn 0.35s ease forwards;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  /* DECORATIVE FRAME */
+  .deco-frame {
+    position: fixed;
+    top: 30px; right: 20px;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(26,18,8,0.15);
+    writing-mode: vertical-rl;
+    font-weight: 500;
+    z-index: 0;
+  }
+
+</style>
+</head>
+<body>
+
+<div class="film-strip">
+  <div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div>
+  <div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div>
+  <div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div>
+  <div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div>
+  <div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div>
+  <div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div>
+  <div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div>
+  <div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div>
+</div>
+
+<div class="film-strip film-strip-bottom">
+  <div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div>
+  <div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div>
+  <div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div>
+  <div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div>
+  <div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div>
+  <div class="film-hole"></div><div class="film-hole"></div><div class="film-hole"></div>
+</div>
+
+<div class="deco-frame">Кино · Архетипы · Стереотипы</div>
+
+<div class="container">
+
+  <!-- INTRO -->
+  <div class="screen active" id="intro">
+    <span class="film-reel">🎬</span>
+    <div class="intro-badge">Интерактивный тест</div>
+    <h1 class="title">Какой ты<br><em>женский</em><br>киноархетип?</h1>
+    <p class="subtitle">6 вопросов. Никакой науки. Зато честный разговор о том, в каком жанре вы все живёте.</p>
+    <button class="btn-start" onclick="startQuiz()"><span>Начать тест →</span></button>
+    <p class="warning-note">⚠ Предупреждение: результаты могут вызвать желание пересмотреть любимые фильмы с новым взглядом</p>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="screen" id="quiz">
+    <div class="progress-bar-wrap">
+      <div class="progress-meta">
+        <span class="progress-label">Вопрос</span>
+        <span class="progress-count" id="progressCount">1 / 6</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+      </div>
+    </div>
+
+    <div id="questionContainer" class="quiz-screen"></div>
+
+    <button class="btn-next" id="btnNext" onclick="nextQuestion()">
+      Следующий вопрос →
+    </button>
+  </div>
+
+  <!-- RESULT -->
+  <div class="screen result-screen" id="result">
+    <div id="resultContent"></div>
+  </div>
+
+</div>
+
+<script>
+const questions = [
+  {
+    text: "Пятница вечер. Планы сорвались. Что делаешь?",
+    options: [
+      { text: "Пересматриваю любимый фильм и плачу в нужных местах — это терапия", archetype: "madonna" },
+      { text: "Строю планы мести всем, кто испортил вечер. Детально", archetype: "femme" },
+      { text: "Еду куда глаза глядят — что-нибудь случится", archetype: "mpdg" },
+      { text: "Составляю список дел на выходные в Excel", archetype: "career" },
+      { text: "Звоню подруге и два часа обсуждаем жизнь", archetype: "ripley" },
+      { text: "Надеваю что-то красивое и иду на улицу одна — пусть смотрят", archetype: "femme" }
+    ]
+  },
+  {
+    text: "Главный герой фильма входит в комнату. Ваш персонаж...",
+    options: [
+      { text: "Смотрит на него с тревогой — что-то сейчас случится, и она не готова", archetype: "madonna" },
+      { text: "Уже знает о нём всё и делает вид, что не знает", archetype: "femme" },
+      { text: "Говорит что-то странное и убегает — он запомнит", archetype: "mpdg" },
+      { text: "Вообще не замечает, потому что занята своим делом", archetype: "ripley" },
+      { text: "Спрашивает: а зачем он вообще здесь?", archetype: "ripley" },
+      { text: "Подаёт ему кофе и надеется, что он заметит", archetype: "madonna" }
+    ]
+  },
+  {
+    text: "Твой жизненный девиз — это...",
+    options: [
+      { text: "«Всё ради семьи» (произносится со слезами на глазах)", archetype: "madonna" },
+      { text: "«Я вернусь» (произносится с холодным взглядом в камеру)", archetype: "femme" },
+      { text: "«Жизнь слишком короткая для скучных понедельников!»", archetype: "mpdg" },
+      { text: "«В конце — только работа остаётся»", archetype: "career" },
+      { text: "«Сначала разберусь с этим сама, потом поговорим»", archetype: "ripley" },
+      { text: "«Я не такая, как все» (все так говорят, но у неё это правда)", archetype: "mpdg" }
+    ]
+  },
+  {
+    text: "Что думаешь о хэппи-энде?",
+    options: [
+      { text: "Хэппи-энд — это когда все живы и в сборе за одним столом", archetype: "madonna" },
+      { text: "Хэппи-энд — это когда я выигрываю. Остальные как хотят", archetype: "femme" },
+      { text: "Хэппи-энд — это когда главный герой наконец живёт полной жизнью. Благодаря мне, очевидно", archetype: "mpdg" },
+      { text: "Хэппи-энд — это когда получила должность, которую заслуживала с начала фильма", archetype: "career" },
+      { text: "Хэппи-энд — это когда все угрозы устранены и можно выдохнуть", archetype: "ripley" },
+      { text: "Хэппи-энды не бывают настоящими. Но трагедия — это красиво", archetype: "femme" }
+    ]
+  },
+  {
+    text: "Что о тебе скажет сценарист в ремарке?",
+    options: [
+      { text: "«Входит. Улыбается, несмотря ни на что. Она всегда улыбается»", archetype: "madonna" },
+      { text: "«Входит. Все замолкают. Никто не понимает почему»", archetype: "femme" },
+      { text: "«Врывается. Что-то говорит. Уходит. Всё изменилось»", archetype: "mpdg" },
+      { text: "«Входит в переговорную. Все встают»", archetype: "career" },
+      { text: "«Входит. Быстро оценивает обстановку. Готова к любому исходу»", archetype: "ripley" },
+      { text: "«Входит. Пауза. Улыбается не той улыбкой»", archetype: "femme" }
+    ]
+  },
+  {
+    text: "Финальная сцена твоего фильма — это...",
+    options: [
+      { text: "Я смотрю вслед уходящему поезду. Долго. Очень долго", archetype: "madonna" },
+      { text: "Крупный план моих глаз. Зритель не знает — победила я или нет. И не узнает", archetype: "femme" },
+      { text: "Я убегаю куда-то, смеясь. Камера не успевает. Так и задумано", archetype: "mpdg" },
+      { text: "Я за рабочим столом в 23:00. Кофе стынет. За окном — город", archetype: "career" },
+      { text: "Смотрю в иллюминатор корабля / самолёта / ракеты. Впереди — неизвестность. Не страшно", archetype: "ripley" },
+      { text: "Иду по улице. Одна. Не нуждаюсь ни в чьей помощи. Никогда не нуждалась", archetype: "ripley" }
+    ]
+  }
+];
+
+const archetypes = {
+  madonna: {
+    icon: "🌹",
+    title: "Мадонна",
+    subtitle: "она страдает красиво и всех прощает",
+    description: "Ты — моральный компас фильма. Тебе причиняют боль, а ты находишь в себе силы улыбнуться. Твоя сила — в терпении, твоя слабость — в том, что сценарист это знает и безжалостно использует. Ты украшаешь каждую сцену своим присутствием. Жаль, что тебя так редко спрашивают, чего ты сама хочешь.",
+    films: "«Крёстный отец» (Кей Адамс), «Унесённые ветром» (Мелани), «Достучаться до небес» (добрая жена) — и почти любой корейский мелодраматический сериал",
+    feminist: "Хорошая новость: Мадонна — это не приговор. «Поэзия» Ли Чхан-дона и «Пианино» Кэмпион показали, что женщина может быть нежной и иметь собственную историю одновременно."
+  },
+  femme: {
+    icon: "🕷️",
+    title: "Роковая женщина",
+    subtitle: "femme fatale с планом Б и планом В",
+    description: "Ты умнее всех в комнате, и все это чувствуют — но никто не может доказать. У тебя есть тайна, возможно несколько. Сценарист боится тебя убивать в финале — ты слишком интересная. Классическое кино решало эту проблему просто: убивало. Современное — пытается понять, откуда ты такая взялась.",
+    films: "«Основной инстинкт» (Кэтрин Трэмелл), «Исчезнувшая» (Эми Данн), «Двойная страховка» (Филлис) — и, конечно, «Ева» и все женщины Альмодовара",
+    feminist: "Роковая женщина — это часто ответ на угнетение. «Исчезнувшая» Финчера сделала её деконструкцию гениально: Эми использует образ femme fatale как единственное доступное ей оружие."
+  },
+  mpdg: {
+    icon: "✨",
+    title: "Manic Pixie Dream Girl",
+    subtitle: "она изменит твою жизнь и исчезнет",
+    description: "Ты — катализатор чужих историй, и это, честно говоря, несправедливо. Ты яркая, непредсказуемая, говоришь странные вещи, которые потом оказываются мудрыми. Проблема в том, что у тебя редко есть собственный финал — ты обычно уходишь за кадр, когда дело сделано. Требуй свою сюжетную линию.",
+    films: "«500 дней лета» (Саммер), «Elizabethtown» (Клэр), «Вечное сияние чистого разума» (Клементина) — хотя Клементина сама говорила зрителю: «Я не концепция»",
+    feminist: "«Клементина» из «Вечного сияния» — один из редких случаев, когда MPDG сама обнажает механику тропа: «Я несовершенный человек, а не твоя фантазия об идеальной девушке»."
+  },
+  career: {
+    icon: "👁️",
+    title: "Железная женщина",
+    subtitle: "успешная, одинокая, права на 100%",
+    description: "Ты добилась всего сама. Кабинет, команда, уважение — всё твоё. Сценарист смотрит на тебя с восхищением и немного со страхом, поэтому обязательно добавит в твою жизнь одиночество как «цену успеха». Это несправедливо: мужским боссам таких уроков не преподают. Ты это знаешь. Именно поэтому ты так хорошо играешь.",
+    films: "«Дьявол носит Prada» (Миранда Пристли), «Эрин Брокович» (редкое исключение — она счастлива), «Железная леди» (Тэтчер) — и почти каждая женщина-антагонист в корпоративной драме",
+    feminist: "«Эрин Брокович» — почти единственный мейнстримный пример, где женщина профессионально успешна И эмоционально не сломлена. Показательно, что это реальная история."
+  },
+  ripley: {
+    icon: "🚀",
+    title: "Эллен Рипли",
+    subtitle: "она просто хочет выжить и уйти домой",
+    description: "Ты не просила быть героиней. Ты просто оказалась единственной, кто принял правильное решение в нужный момент. У тебя нет времени на красивые позы — есть задача, и ты её решаешь. Ты редкость в кино: тебя не определяют через отношения с мужчиной. Ты просто человек, которому нужно выжить. Это звучит просто. Это революция.",
+    films: "«Чужой» (Эллен Рипли), «Безумный Макс: Дорога ярости» (Фуриоса), «Портрет девушки в огне» (Марианна) — и Аска из «Евангелиона», если убрать всё, что с ней сделали сценаристы",
+    feminist: "Рипли появилась в 1979 году и до сих пор остаётся одним из самых честных женских персонажей кино. Джеймс Кэмерон писал её как человека, не думая о гендере. Иногда это и есть ответ."
+  }
+};
+
+let currentQuestion = 0;
+let scores = { madonna: 0, femme: 0, mpdg: 0, career: 0, ripley: 0 };
+let selectedOption = null;
+
+function startQuiz() {
+  document.getElementById('intro').classList.remove('active');
+  document.getElementById('quiz').classList.add('active');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  selectedOption = null;
+  document.getElementById('btnNext').classList.remove('visible');
+
+  const q = questions[currentQuestion];
+  const letters = ['А', 'Б', 'В', 'Г', 'Д', 'Е'];
+
+  const html = `
+    <div class="question-number">Вопрос ${currentQuestion + 1}</div>
+    <div class="question-text">${q.text}</div>
+    <div class="options">
+      ${q.options.map((opt, i) => `
+        <button class="option" onclick="selectOption(this, '${opt.archetype}')">
+          <span class="option-letter">${letters[i]}.</span>${opt.text}
+        </button>
+      `).join('')}
+    </div>
+  `;
+
+  const container = document.getElementById('questionContainer');
+  container.innerHTML = html;
+  container.className = 'quiz-screen';
+  void container.offsetWidth;
+  container.className = 'quiz-screen';
+
+  document.getElementById('progressCount').textContent = `${currentQuestion + 1} / ${questions.length}`;
+  document.getElementById('progressFill').style.width = `${(currentQuestion / questions.length) * 100}%`;
+
+  const btnNext = document.getElementById('btnNext');
+  btnNext.textContent = currentQuestion < questions.length - 1 ? 'Следующий вопрос →' : 'Узнать результат ✦';
+}
+
+function selectOption(btn, archetype) {
+  document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedOption = archetype;
+  document.getElementById('btnNext').classList.add('visible');
+}
+
+function nextQuestion() {
+  if (!selectedOption) return;
+  scores[selectedOption]++;
+  currentQuestion++;
+
+  if (currentQuestion >= questions.length) {
+    showResult();
+    return;
+  }
+
+  renderQuestion();
+}
+
+function showResult() {
+  document.getElementById('progressFill').style.width = '100%';
+
+  const winner = Object.entries(scores).sort((a, b) => b[1] - a[1])[0][0];
+  const r = archetypes[winner];
+
+  document.getElementById('quiz').classList.remove('active');
+  document.getElementById('result').classList.add('active');
+
+  document.getElementById('resultContent').innerHTML = `
+    <span class="result-icon">${r.icon}</span>
+    <div class="result-label">Твой архетип</div>
+    <h2 class="result-title">${r.title}</h2>
+    <div class="result-subtitle">${r.subtitle}</div>
+    <div class="result-divider"></div>
+    <p class="result-description">${r.description}</p>
+    <div class="result-films">
+      <div class="result-films-label">📽 Твои фильмы</div>
+      <p>${r.films}</p>
+    </div>
+    <div class="result-feminist">
+      <div class="result-feminist-label">🔍 Феминистская оптика</div>
+      <p>${r.feminist}</p>
+    </div>
+    <button class="btn-restart" onclick="restartQuiz()">Пройти ещё раз</button>
+  `;
+}
+
+function restartQuiz() {
+  currentQuestion = 0;
+  scores = { madonna: 0, femme: 0, mpdg: 0, career: 0, ripley: 0 };
+  selectedOption = null;
+
+  document.getElementById('result').classList.remove('active');
+  document.getElementById('quiz').classList.add('active');
+  renderQuestion();
+}
+</script>
+</body>
+</html>
